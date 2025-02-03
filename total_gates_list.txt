@@ -1,0 +1,1005 @@
+Number of Combinations: 167
+
+TH12_TH22
+PolymorphicGateCombination(
+	HVDD: TH12 (A | B),
+	LVDD: TH22 (A & B)
+)
+
+TH13_TH23
+PolymorphicGateCombination(
+	HVDD: TH13 (A | B | C),
+	LVDD: TH23 ((A & B) | (A & C) | (B & C))
+)
+
+TH13_TH33
+PolymorphicGateCombination(
+	HVDD: TH13 (A | B | C),
+	LVDD: TH33 (A & B & C)
+)
+
+TH13_TH23w2
+PolymorphicGateCombination(
+	HVDD: TH13 (A | B | C),
+	LVDD: TH23w2 (A | (B & C))
+)
+
+TH13_TH33w2
+PolymorphicGateCombination(
+	HVDD: TH13 (A | B | C),
+	LVDD: TH33w2 ((A & B) | (A & C))
+)
+
+TH23_TH33
+PolymorphicGateCombination(
+	HVDD: TH23 ((A & B) | (A & C) | (B & C)),
+	LVDD: TH33 (A & B & C)
+)
+
+TH23_TH33w2
+PolymorphicGateCombination(
+	HVDD: TH23 ((A & B) | (A & C) | (B & C)),
+	LVDD: TH33w2 ((A & B) | (A & C))
+)
+
+TH23w2_TH23
+PolymorphicGateCombination(
+	HVDD: TH23w2 (A | (B & C)),
+	LVDD: TH23 ((A & B) | (A & C) | (B & C))
+)
+
+TH23w2_TH33
+PolymorphicGateCombination(
+	HVDD: TH23w2 (A | (B & C)),
+	LVDD: TH33 (A & B & C)
+)
+
+TH23w2_TH33w2
+PolymorphicGateCombination(
+	HVDD: TH23w2 (A | (B & C)),
+	LVDD: TH33w2 ((A & B) | (A & C))
+)
+
+TH33w2_TH33
+PolymorphicGateCombination(
+	HVDD: TH33w2 ((A & B) | (A & C)),
+	LVDD: TH33 (A & B & C)
+)
+
+TH14_TH24
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D))
+)
+
+TH14_TH34
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH14_TH44
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH14_TH24w2
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH24w2 (A | (B & C) | (B & D) | (C & D))
+)
+
+TH14_TH34w2
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D))
+)
+
+TH14_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH14_TH34w3
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH34w3 (A | (B & C & D))
+)
+
+TH14_TH44w3
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH44w3 ((A & B) | (A & C) | (A & D))
+)
+
+TH14_TH24w22
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH24w22 (A | B | (C & D))
+)
+
+TH14_TH34w22
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D))
+)
+
+TH14_TH44w22
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C))
+)
+
+TH14_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH14_TH34w32
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH34w32 (A | B | (C & D))
+)
+
+TH14_TH54w32
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH54w32 (A & B | A & C & D | B & C & D)
+)
+
+TH14_TH44w322
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH44w322 (A & B | A & C | A & D | B & C)
+)
+
+TH14_TH54w322
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH54w322 (A & B & C | A & B & D | C & D)
+)
+
+TH14_THxor0
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: THxor0 (A & B | C & D)
+)
+
+TH14_THand0
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: THand0 (A & B | B & C | A & D)
+)
+
+TH14_TH24comp
+PolymorphicGateCombination(
+	HVDD: TH14 (A | B | C | D),
+	LVDD: TH24comp (A & C | B & C | A & D | B & D)
+)
+
+TH24_TH34
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH24_TH44
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH24_TH34w2
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D))
+)
+
+TH24_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH24_TH44w3
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: TH44w3 ((A & B) | (A & C) | (A & D))
+)
+
+TH24_TH34w22
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D))
+)
+
+TH24_TH44w22
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C))
+)
+
+TH24_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH24_TH54w32
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: TH54w32 (A & B | A & C & D | B & C & D)
+)
+
+TH24_TH44w322
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: TH44w322 (A & B | A & C | A & D | B & C)
+)
+
+TH24_TH54w322
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: TH54w322 (A & B & C | A & B & D | C & D)
+)
+
+TH24_THxor0
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: THxor0 (A & B | C & D)
+)
+
+TH24_THand0
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: THand0 (A & B | B & C | A & D)
+)
+
+TH24_TH24comp
+PolymorphicGateCombination(
+	HVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D)),
+	LVDD: TH24comp (A & C | B & C | A & D | B & D)
+)
+
+TH34_TH44
+PolymorphicGateCombination(
+	HVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D)),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH34_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D)),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH34_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D)),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH24w2_TH24
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D))
+)
+
+TH24w2_TH34
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH24w2_TH44
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH24w2_TH34w2
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D))
+)
+
+TH24w2_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH24w2_TH34w3
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH34w3 (A | (B & C & D))
+)
+
+TH24w2_TH44w3
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH44w3 ((A & B) | (A & C) | (A & D))
+)
+
+TH24w2_TH34w22
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D))
+)
+
+TH24w2_TH44w22
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C))
+)
+
+TH24w2_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH24w2_TH54w32
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH54w32 (A & B | A & C & D | B & C & D)
+)
+
+TH24w2_TH44w322
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH44w322 (A & B | A & C | A & D | B & C)
+)
+
+TH24w2_TH54w322
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH54w322 (A & B & C | A & B & D | C & D)
+)
+
+TH24w2_THxor0
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: THxor0 (A & B | C & D)
+)
+
+TH24w2_THand0
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: THand0 (A & B | B & C | A & D)
+)
+
+TH24w2_TH24comp
+PolymorphicGateCombination(
+	HVDD: TH24w2 (A | (B & C) | (B & D) | (C & D)),
+	LVDD: TH24comp (A & C | B & C | A & D | B & D)
+)
+
+TH34w2_TH34
+PolymorphicGateCombination(
+	HVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D)),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH34w2_TH44
+PolymorphicGateCombination(
+	HVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D)),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH34w2_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D)),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH34w2_TH44w3
+PolymorphicGateCombination(
+	HVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D)),
+	LVDD: TH44w3 ((A & B) | (A & C) | (A & D))
+)
+
+TH34w2_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D)),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH34w2_TH54w32
+PolymorphicGateCombination(
+	HVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D)),
+	LVDD: TH54w32 (A & B | A & C & D | B & C & D)
+)
+
+TH44w2_TH44
+PolymorphicGateCombination(
+	HVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D)),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH44w2_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D)),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH34w3_TH34
+PolymorphicGateCombination(
+	HVDD: TH34w3 (A | (B & C & D)),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH34w3_TH44
+PolymorphicGateCombination(
+	HVDD: TH34w3 (A | (B & C & D)),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH34w3_TH34w2
+PolymorphicGateCombination(
+	HVDD: TH34w3 (A | (B & C & D)),
+	LVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D))
+)
+
+TH34w3_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH34w3 (A | (B & C & D)),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH34w3_TH44w3
+PolymorphicGateCombination(
+	HVDD: TH34w3 (A | (B & C & D)),
+	LVDD: TH44w3 ((A & B) | (A & C) | (A & D))
+)
+
+TH34w3_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH34w3 (A | (B & C & D)),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH34w3_TH54w32
+PolymorphicGateCombination(
+	HVDD: TH34w3 (A | (B & C & D)),
+	LVDD: TH54w32 (A & B | A & C & D | B & C & D)
+)
+
+TH44w3_TH44
+PolymorphicGateCombination(
+	HVDD: TH44w3 ((A & B) | (A & C) | (A & D)),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH44w3_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH44w3 ((A & B) | (A & C) | (A & D)),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH44w3_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH44w3 ((A & B) | (A & C) | (A & D)),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH24w22_TH24
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D))
+)
+
+TH24w22_TH34
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH24w22_TH44
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH24w22_TH24w2
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH24w2 (A | (B & C) | (B & D) | (C & D))
+)
+
+TH24w22_TH34w2
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D))
+)
+
+TH24w22_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH24w22_TH34w3
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH34w3 (A | (B & C & D))
+)
+
+TH24w22_TH44w3
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH44w3 ((A & B) | (A & C) | (A & D))
+)
+
+TH24w22_TH34w22
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D))
+)
+
+TH24w22_TH44w22
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C))
+)
+
+TH24w22_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH24w22_TH34w32
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH34w32 (A | B | (C & D))
+)
+
+TH24w22_TH54w32
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH54w32 (A & B | A & C & D | B & C & D)
+)
+
+TH24w22_TH44w322
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH44w322 (A & B | A & C | A & D | B & C)
+)
+
+TH24w22_TH54w322
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH54w322 (A & B & C | A & B & D | C & D)
+)
+
+TH24w22_THxor0
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: THxor0 (A & B | C & D)
+)
+
+TH24w22_THand0
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: THand0 (A & B | B & C | A & D)
+)
+
+TH24w22_TH24comp
+PolymorphicGateCombination(
+	HVDD: TH24w22 (A | B | (C & D)),
+	LVDD: TH24comp (A & C | B & C | A & D | B & D)
+)
+
+TH34w22_TH34
+PolymorphicGateCombination(
+	HVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D)),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH34w22_TH44
+PolymorphicGateCombination(
+	HVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D)),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH34w22_TH34w2
+PolymorphicGateCombination(
+	HVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D)),
+	LVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D))
+)
+
+TH34w22_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D)),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH34w22_TH44w3
+PolymorphicGateCombination(
+	HVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D)),
+	LVDD: TH44w3 ((A & B) | (A & C) | (A & D))
+)
+
+TH34w22_TH44w22
+PolymorphicGateCombination(
+	HVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D)),
+	LVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C))
+)
+
+TH34w22_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D)),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH34w22_TH54w32
+PolymorphicGateCombination(
+	HVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D)),
+	LVDD: TH54w32 (A & B | A & C & D | B & C & D)
+)
+
+TH34w22_TH44w322
+PolymorphicGateCombination(
+	HVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D)),
+	LVDD: TH44w322 (A & B | A & C | A & D | B & C)
+)
+
+TH34w22_THand0
+PolymorphicGateCombination(
+	HVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D)),
+	LVDD: THand0 (A & B | B & C | A & D)
+)
+
+TH34w22_TH24comp
+PolymorphicGateCombination(
+	HVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D)),
+	LVDD: TH24comp (A & C | B & C | A & D | B & D)
+)
+
+TH44w22_TH34
+PolymorphicGateCombination(
+	HVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C)),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH44w22_TH44
+PolymorphicGateCombination(
+	HVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C)),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH44w22_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C)),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH44w22_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C)),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH54w22_TH44
+PolymorphicGateCombination(
+	HVDD: TH54w22 (A & B & C | A & B & D),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH34w32_TH24
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH24 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D) | (C & D))
+)
+
+TH34w32_TH34
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH34w32_TH44
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH34w32_TH24w2
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH24w2 (A | (B & C) | (B & D) | (C & D))
+)
+
+TH34w32_TH34w2
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D))
+)
+
+TH34w32_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH34w32_TH34w3
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH34w3 (A | (B & C & D))
+)
+
+TH34w32_TH44w3
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH44w3 ((A & B) | (A & C) | (A & D))
+)
+
+TH34w32_TH24w22
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH24w22 (A | B | (C & D))
+)
+
+TH34w32_TH34w22
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH34w22 ((A & B) | (A & C) | (A & D) | (B & C) | (B & D))
+)
+
+TH34w32_TH44w22
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C))
+)
+
+TH34w32_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH34w32_TH54w32
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH54w32 (A & B | A & C & D | B & C & D)
+)
+
+TH34w32_TH44w322
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH44w322 (A & B | A & C | A & D | B & C)
+)
+
+TH34w32_TH54w322
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH54w322 (A & B & C | A & B & D | C & D)
+)
+
+TH34w32_THxor0
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: THxor0 (A & B | C & D)
+)
+
+TH34w32_THand0
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: THand0 (A & B | B & C | A & D)
+)
+
+TH34w32_TH24comp
+PolymorphicGateCombination(
+	HVDD: TH34w32 (A | B | (C & D)),
+	LVDD: TH24comp (A & C | B & C | A & D | B & D)
+)
+
+TH54w32_TH34
+PolymorphicGateCombination(
+	HVDD: TH54w32 (A & B | A & C & D | B & C & D),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH54w32_TH44
+PolymorphicGateCombination(
+	HVDD: TH54w32 (A & B | A & C & D | B & C & D),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH54w32_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH54w32 (A & B | A & C & D | B & C & D),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH54w32_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH54w32 (A & B | A & C & D | B & C & D),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH44w322_TH34
+PolymorphicGateCombination(
+	HVDD: TH44w322 (A & B | A & C | A & D | B & C),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH44w322_TH44
+PolymorphicGateCombination(
+	HVDD: TH44w322 (A & B | A & C | A & D | B & C),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH44w322_TH34w2
+PolymorphicGateCombination(
+	HVDD: TH44w322 (A & B | A & C | A & D | B & C),
+	LVDD: TH34w2 ((A & B) | (A & C) | (A & D) | (B & C & D))
+)
+
+TH44w322_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH44w322 (A & B | A & C | A & D | B & C),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH44w322_TH44w3
+PolymorphicGateCombination(
+	HVDD: TH44w322 (A & B | A & C | A & D | B & C),
+	LVDD: TH44w3 ((A & B) | (A & C) | (A & D))
+)
+
+TH44w322_TH44w22
+PolymorphicGateCombination(
+	HVDD: TH44w322 (A & B | A & C | A & D | B & C),
+	LVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C))
+)
+
+TH44w322_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH44w322 (A & B | A & C | A & D | B & C),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+TH44w322_TH54w32
+PolymorphicGateCombination(
+	HVDD: TH44w322 (A & B | A & C | A & D | B & C),
+	LVDD: TH54w32 (A & B | A & C & D | B & C & D)
+)
+
+TH44w322_THand0
+PolymorphicGateCombination(
+	HVDD: TH44w322 (A & B | A & C | A & D | B & C),
+	LVDD: THand0 (A & B | B & C | A & D)
+)
+
+TH54w322_TH34
+PolymorphicGateCombination(
+	HVDD: TH54w322 (A & B & C | A & B & D | C & D),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH54w322_TH44
+PolymorphicGateCombination(
+	HVDD: TH54w322 (A & B & C | A & B & D | C & D),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH54w322_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH54w322 (A & B & C | A & B & D | C & D),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH54w322_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH54w322 (A & B & C | A & B & D | C & D),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+THxor0_TH34
+PolymorphicGateCombination(
+	HVDD: THxor0 (A & B | C & D),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+THxor0_TH44
+PolymorphicGateCombination(
+	HVDD: THxor0 (A & B | C & D),
+	LVDD: TH44 (A & B & C & D)
+)
+
+THxor0_TH44w2
+PolymorphicGateCombination(
+	HVDD: THxor0 (A & B | C & D),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+THxor0_TH54w22
+PolymorphicGateCombination(
+	HVDD: THxor0 (A & B | C & D),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+THxor0_TH54w32
+PolymorphicGateCombination(
+	HVDD: THxor0 (A & B | C & D),
+	LVDD: TH54w32 (A & B | A & C & D | B & C & D)
+)
+
+THxor0_TH54w322
+PolymorphicGateCombination(
+	HVDD: THxor0 (A & B | C & D),
+	LVDD: TH54w322 (A & B & C | A & B & D | C & D)
+)
+
+THand0_TH34
+PolymorphicGateCombination(
+	HVDD: THand0 (A & B | B & C | A & D),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+THand0_TH44
+PolymorphicGateCombination(
+	HVDD: THand0 (A & B | B & C | A & D),
+	LVDD: TH44 (A & B & C & D)
+)
+
+THand0_TH44w2
+PolymorphicGateCombination(
+	HVDD: THand0 (A & B | B & C | A & D),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+THand0_TH44w22
+PolymorphicGateCombination(
+	HVDD: THand0 (A & B | B & C | A & D),
+	LVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C))
+)
+
+THand0_TH54w22
+PolymorphicGateCombination(
+	HVDD: THand0 (A & B | B & C | A & D),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+THand0_TH54w32
+PolymorphicGateCombination(
+	HVDD: THand0 (A & B | B & C | A & D),
+	LVDD: TH54w32 (A & B | A & C & D | B & C & D)
+)
+
+TH24comp_TH34
+PolymorphicGateCombination(
+	HVDD: TH24comp (A & C | B & C | A & D | B & D),
+	LVDD: TH34 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C & D))
+)
+
+TH24comp_TH44
+PolymorphicGateCombination(
+	HVDD: TH24comp (A & C | B & C | A & D | B & D),
+	LVDD: TH44 (A & B & C & D)
+)
+
+TH24comp_TH44w2
+PolymorphicGateCombination(
+	HVDD: TH24comp (A & C | B & C | A & D | B & D),
+	LVDD: TH44w2 ((A & B & C) | (A & B & D) | (A & C & D))
+)
+
+TH24comp_TH44w22
+PolymorphicGateCombination(
+	HVDD: TH24comp (A & C | B & C | A & D | B & D),
+	LVDD: TH44w22 ((A & B & C) | (A & B & D) | (A & C & D) | (B & C))
+)
+
+TH24comp_TH54w22
+PolymorphicGateCombination(
+	HVDD: TH24comp (A & C | B & C | A & D | B & D),
+	LVDD: TH54w22 (A & B & C | A & B & D)
+)
+
+Combinations saved to: polymorphic_gates_all.csv
