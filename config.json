@@ -1,0 +1,35 @@
+{
+    "input": {
+        "gates_dir": ["gates/basic_gates.vhdl", "gates/MTNCL_Polymorphic_Gates.vhd"],
+        "hvdd_equation": "A + B",
+        "lvdd_equation": "A & B",
+        "num_circuits": 2
+    },
+    "output": {
+        "directory": "./output",
+        "generate_testbench": true
+    },
+    "constraints": {
+        "min_gates": 1,
+        "max_gates": null,
+        "max_fanout": 4,
+        "max_depth": 10
+    },
+    "optimization": {
+        "target": "area",
+        "weights": {
+            "area": 1.0,
+            "delay": 0.5,
+            "power": 0.3
+        }
+    },
+    "documentation": {
+        "include_metrics": true,
+        "include_diagrams": false,
+        "format": "markdown"
+    },
+    "gates": {
+        "preferred": [],
+        "avoid": []
+    }
+} 

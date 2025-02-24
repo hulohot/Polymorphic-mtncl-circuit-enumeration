@@ -1,1 +1,200 @@
-# Polymorphic-mtncl-circuit-enumeration
+# MTNCL Circuit Generator
+
+A Python-based tool for generating Multi-Threshold Null Convention Logic (MTNCL) circuits from boolean equations. This tool creates Verilog netlists using predefined MTNCL gates and generates testbenches for verification.
+
+## Features
+
+- Converts boolean equations to MTNCL circuit implementations
+- Generates multiple alternative implementations using different gate combinations
+- Supports various MTNCL gates (TH12, TH22, TH13, TH33, TH23, THXOR)
+- Produces Verilog netlists and testbenches
+- Validates circuit constraints (depth, fanout, etc.)
+- Optimizes for area, delay, or power based on configuration
+
+## Limitations
+
+- Does NOT support negation operations (NOT/INV gates)
+- All operations must be implemented using threshold gates
+- Boolean equations must use only AND (&), OR (+), and XOR (^) operations
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/mtncl-circuit-generator.git
+cd mtncl-circuit-generator
+```
+
+2. Create and activate a virtual environment:
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+
+### Configuration File
+
+The tool is primarily configured through a JSON configuration file:
+
+```json
+{
+    "input": {
+        "gates_dir": "gates/basic_gates.vhdl",
+        "boolean_equation": "(A + B) & (C + D)",
+        "num_circuits": 2
+    },
+    "output": {
+        "directory": "./output",
+        "generate_testbench": true
+    },
+    "constraints": {
+        "min_gates": 1,
+        "max_gates": null,
+        "max_fanout": 4,
+        "max_depth": 10
+    },
+    "optimization": {
+        "target": "area",
+        "weights": {
+            "area": 1.0,
+            "delay": 0.5,
+            "power": 0.3
+        }
+    },
+    "documentation": {
+        "include_metrics": true,
+        "include_diagrams": false,
+        "format": "markdown"
+    },
+    "gates": {
+        "preferred": ["TH12", "TH22", "TH34w2"],
+        "avoid": []
+    }
+}
+```
+
+### Command Line Interface
+
+While all parameters can be specified in the config file, they can also be overridden via command line:
+
+```bash
+python -m mtncl_generator.main [vhdl_files] [equation] [-n num_circuits] [-c config] [-o output_dir]
+```
+
+Arguments:
+- `vhdl_files`: One or more VHDL files containing gate definitions (optional if in config)
+- `equation`: Boolean equation to implement (optional if in config)
+- `-n, --num-circuits`: Number of different implementations to generate
+- `-c, --config`: Configuration file path (default: config.json)
+- `-o, --output-dir`: Output directory for generated files
+- `-l, --log-level`: Set logging level (default: INFO)
+
+### Example Usage
+
+Using just the config file:
+```bash
+python -m mtncl_generator.main -c config.json
+```
+
+Overriding config with command line:
+```bash
+python -m mtncl_generator.main gates/basic_gates.vhdl "A + B" -n 2
+```
+
+## Supported Gates
+
+The following MTNCL gates are supported:
+
+| Gate  | Function | Description |
+|-------|----------|-------------|
+| TH12  | OR       | 2-input OR gate |
+| TH22  | AND      | 2-input AND gate |
+| TH13  | OR3      | 3-input OR gate |
+| TH33  | AND3     | 3-input AND gate |
+| TH23  | 2of3     | 2-of-3 threshold gate |
+| THXOR | XOR      | 2-input XOR gate |
+
+## Output Files
+
+For each circuit implementation, the tool generates:
+1. A Verilog netlist file (circuit_X.v)
+2. A corresponding testbench (circuit_X_tb.v)
+3. A README.md with detailed metrics and documentation
+
+Example output structure:
+```
+output/
+├── circuit_0.v          # First implementation
+├── circuit_0_tb.v       # First implementation testbench
+├── circuit_1.v          # Alternative implementation
+├── circuit_1_tb.v       # Alternative implementation testbench
+└── README.md           # Generation documentation
+```
+
+## Circuit Validation
+
+The tool performs several validation checks:
+- Gate count constraints
+- Maximum fanout limits
+- Circuit depth restrictions
+- Acyclic graph verification
+- Wire connectivity validation
+- Gate availability verification
+
+## Development
+
+### Running Tests
+
+```bash
+python3 -m pytest tests/ -v
+```
+
+### Project Structure
+
+```
+.
+├── mtncl_generator/          # Main package directory
+│   ├── __init__.py          # Package initialization
+│   ├── main.py              # Main entry point
+│   ├── parsers/             # Input parsing modules
+│   │   ├── boolean_parser.py  # Boolean equation parser
+│   │   └── vhdl_parser.py     # VHDL gate definition parser
+│   ├── core/                # Core functionality
+│   │   └── circuit_generator.py  # Circuit generation logic
+│   └── writers/             # Output generation modules
+│       └── verilog_writer.py    # Verilog netlist writer
+├── gates/                   # VHDL gate definitions
+│   └── basic_gates.vhdl     # Basic MTNCL gate definitions
+├── tests/                   # Test suite
+│   ├── test_parsers.py      # Parser tests
+│   ├── test_circuit_generator.py  # Generator tests
+│   └── test_verilog_writer.py    # Writer tests
+├── output/                  # Generated circuit output
+├── config.json             # Default configuration
+├── requirements.txt        # Python dependencies
+├── setup.py               # Package installation setup
+└── README.md              # Project documentation
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- MTNCL gate definitions based on standard threshold logic implementations
+- Circuit optimization strategies derived from established EDA practices
