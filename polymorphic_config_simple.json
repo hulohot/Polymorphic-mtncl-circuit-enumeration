@@ -1,0 +1,45 @@
+{
+    "input": {
+        "gates_dir": [
+            "gates/basic_gates.vhdl",
+            "gates/MTNCL_Polymorphic_Gates_Basic.vhd"
+        ],
+        "hvdd_equation": "A",
+        "lvdd_equation": "B",
+        "num_circuits": 2
+    },
+    "mode": "polymorphic",
+    "output": {
+        "directory": "./output/polymorphic-simple",
+        "generate_testbench": true
+    },
+    "constraints": {
+        "min_gates": 1,
+        "max_gates": null,
+        "max_fanout": 4,
+        "max_depth": 10
+    },
+    "optimization": {
+        "target": "area",
+        "weights": {
+            "area": 1.0,
+            "delay": 0.5,
+            "power": 0.3
+        }
+    },
+    "documentation": {
+        "include_metrics": true,
+        "include_diagrams": false,
+        "format": "markdown"
+    },
+    "gates": {
+        "preferred": ["TH12m_TH22m", "TH13m_TH33m"],
+        "avoid": []
+    },
+    "polymorphic": {
+        "use_direct_mapping": true,
+        "use_alternative_mapping": true,
+        "required_gates": ["TH12m_TH22m"],
+        "alternative_gates": ["TH13m_TH33m"]
+    }
+} 
