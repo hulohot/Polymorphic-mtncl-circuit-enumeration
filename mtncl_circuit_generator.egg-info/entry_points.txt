@@ -1,0 +1,2 @@
+[console_scripts]
+mtncl-generate = mtncl_generator.main:main

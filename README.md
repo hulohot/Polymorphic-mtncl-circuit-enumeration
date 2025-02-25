@@ -1,6 +1,6 @@
 # MTNCL Circuit Generator
 
-A Python-based tool for generating Multi-Threshold Null Convention Logic (MTNCL) circuits from boolean equations. This tool creates Verilog netlists using predefined MTNCL gates and generates testbenches for verification.
+This tool generates MTNCL (Multi-Threshold Null Convention Logic) circuits from boolean equations. It supports both regular MTNCL circuits and polymorphic MTNCL circuits that implement different functions depending on the supply voltage (HVDD or LVDD).
 
 ## Features
 
@@ -10,6 +10,7 @@ A Python-based tool for generating Multi-Threshold Null Convention Logic (MTNCL)
 - Produces Verilog netlists and testbenches
 - Validates circuit constraints (depth, fanout, etc.)
 - Optimizes for area, delay, or power based on configuration
+- Supports polymorphic MTNCL gates for dual-function circuits
 
 ## Limitations
 
@@ -19,38 +20,38 @@ A Python-based tool for generating Multi-Threshold Null Convention Logic (MTNCL)
 
 ## Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/mtncl-circuit-generator.git
-cd mtncl-circuit-generator
-```
+1. Clone this repository
+2. Create a virtual environment: `python -m venv .venv`
+3. Activate the virtual environment: `source .venv/bin/activate`
+4. Install dependencies: `pip install -r requirements.txt`
 
-2. Create and activate a virtual environment:
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-```
+## Gate Definitions
 
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+The tool includes several VHDL files with gate definitions:
 
-## Usage
+- `gates/basic_gates.vhdl`: Basic MTNCL gate definitions without timing details
+- `gates/MTNCL_Polymorphic_Gates.vhd`: Detailed polymorphic gate definitions with timing information
+- `gates/MTNCL_Polymorphic_Gates_Basic.vhd`: Simplified polymorphic gate definitions without detailed timing
 
-### Configuration File
+## Configuration Files
 
-The tool is primarily configured through a JSON configuration file:
+The tool uses separate configuration files for regular and polymorphic circuit generation:
+
+- `config.json`: Configuration for regular MTNCL circuits
+- `polymorphic_config.json`: Configuration for polymorphic MTNCL circuits
+
+### Regular MTNCL Configuration (`config.json`)
 
 ```json
 {
     "input": {
-        "gates_dir": "gates/basic_gates.vhdl",
-        "boolean_equation": "(A + B) & (C + D)",
+        "gates_dir": ["gates/basic_gates.vhdl"],
+        "equation": "(A + B) & (C + D)",
         "num_circuits": 2
     },
+    "mode": "regular",
     "output": {
-        "directory": "./output",
+        "directory": "./output/regular",
         "generate_testbench": true
     },
     "constraints": {
@@ -73,38 +74,120 @@ The tool is primarily configured through a JSON configuration file:
         "format": "markdown"
     },
     "gates": {
-        "preferred": ["TH12", "TH22", "TH34w2"],
+        "preferred": [],
         "avoid": []
     }
 }
 ```
 
-### Command Line Interface
+### Polymorphic MTNCL Configuration (`polymorphic_config.json`)
 
-While all parameters can be specified in the config file, they can also be overridden via command line:
-
-```bash
-python -m mtncl_generator.main [vhdl_files] [equation] [-n num_circuits] [-c config] [-o output_dir]
+```json
+{
+    "input": {
+        "gates_dir": ["gates/basic_gates.vhdl", "gates/MTNCL_Polymorphic_Gates.vhd"],
+        "hvdd_equation": "A + B",
+        "lvdd_equation": "A & B",
+        "num_circuits": 2
+    },
+    "mode": "polymorphic",
+    "output": {
+        "directory": "./output/polymorphic",
+        "generate_testbench": true
+    },
+    "constraints": {
+        "min_gates": 1,
+        "max_gates": null,
+        "max_fanout": 4,
+        "max_depth": 10
+    },
+    "optimization": {
+        "target": "area",
+        "weights": {
+            "area": 1.0,
+            "delay": 0.5,
+            "power": 0.3
+        }
+    },
+    "documentation": {
+        "include_metrics": true,
+        "include_diagrams": false,
+        "format": "markdown"
+    },
+    "gates": {
+        "preferred": ["TH12m_TH22m", "TH13m_TH33m"],
+        "avoid": []
+    },
+    "polymorphic": {
+        "use_direct_mapping": true,
+        "use_alternative_mapping": true,
+        "required_gates": ["TH12m_TH22m"],
+        "alternative_gates": ["TH13m_TH33m"]
+    }
+}
 ```
 
-Arguments:
-- `vhdl_files`: One or more VHDL files containing gate definitions (optional if in config)
-- `equation`: Boolean equation to implement (optional if in config)
-- `-n, --num-circuits`: Number of different implementations to generate
-- `-c, --config`: Configuration file path (default: config.json)
-- `-o, --output-dir`: Output directory for generated files
-- `-l, --log-level`: Set logging level (default: INFO)
+## Usage
 
-### Example Usage
+### Generate Regular MTNCL Circuits
 
-Using just the config file:
 ```bash
 python -m mtncl_generator.main -c config.json
 ```
 
-Overriding config with command line:
+### Generate Polymorphic MTNCL Circuits
+
 ```bash
-python -m mtncl_generator.main gates/basic_gates.vhdl "A + B" -n 2
+python -m mtncl_generator.main --polymorphic -p polymorphic_config.json
+```
+
+### Command Line Options
+
+- `-c, --config`: Path to regular configuration file (default: `config.json`)
+- `-p, --polymorphic-config`: Path to polymorphic configuration file (default: `polymorphic_config.json`)
+- `--polymorphic`: Use polymorphic mode
+- `-e, --equation`: Boolean equation for regular MTNCL circuit
+- `--hvdd-equation`: Boolean equation for HVDD operation
+- `--lvdd-equation`: Boolean equation for LVDD operation
+- `-n, --num-circuits`: Number of circuits to generate
+- `-o, --output-dir`: Output directory
+- `-l, --log-level`: Logging level
+
+## Examples
+
+### Generate a Regular MTNCL Circuit
+
+```bash
+python -m mtncl_generator.main -e "A & B | C"
+```
+
+### Generate a Polymorphic MTNCL Circuit
+
+```bash
+python -m mtncl_generator.main --polymorphic --hvdd-equation "A + B" --lvdd-equation "A & B"
+```
+
+### Use Custom Configuration Files
+
+```bash
+python -m mtncl_generator.main -c my_config.json
+python -m mtncl_generator.main --polymorphic -p my_polymorphic_config.json
+```
+
+## Output
+
+The generated circuits are saved in the output directory specified in the configuration file. For each circuit, the following files are generated:
+
+- `circuit_X.v`: Verilog netlist for the circuit
+- `circuit_X_tb.v`: Testbench for the circuit (if enabled)
+- `README.md`: Documentation of the generated circuits
+
+## Testing
+
+Run the tests to verify the functionality:
+
+```bash
+python -m pytest tests/
 ```
 
 ## Supported Gates
@@ -119,33 +202,6 @@ The following MTNCL gates are supported:
 | TH33  | AND3     | 3-input AND gate |
 | TH23  | 2of3     | 2-of-3 threshold gate |
 | THXOR | XOR      | 2-input XOR gate |
-
-## Output Files
-
-For each circuit implementation, the tool generates:
-1. A Verilog netlist file (circuit_X.v)
-2. A corresponding testbench (circuit_X_tb.v)
-3. A README.md with detailed metrics and documentation
-
-Example output structure:
-```
-output/
-├── circuit_0.v          # First implementation
-├── circuit_0_tb.v       # First implementation testbench
-├── circuit_1.v          # Alternative implementation
-├── circuit_1_tb.v       # Alternative implementation testbench
-└── README.md           # Generation documentation
-```
-
-## Circuit Validation
-
-The tool performs several validation checks:
-- Gate count constraints
-- Maximum fanout limits
-- Circuit depth restrictions
-- Acyclic graph verification
-- Wire connectivity validation
-- Gate availability verification
 
 ## Development
 

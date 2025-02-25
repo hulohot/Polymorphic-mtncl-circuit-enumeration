@@ -141,6 +141,17 @@ class CircuitGenerator:
             return None
             
         elif node.type in (TokenType.AND, TokenType.OR, TokenType.XOR):
+            # Check if we can use a 3-input gate
+            if (node.left.type == node.type and 
+                node.left.left.type == TokenType.VARIABLE and 
+                node.left.right.type == TokenType.VARIABLE and 
+                node.right.type == TokenType.VARIABLE):
+                # Three variables with same operation
+                a_wire = self._process_node(node.left.left, circuit)
+                b_wire = self._process_node(node.left.right, circuit)
+                c_wire = self._process_node(node.right, circuit)
+                return self._add_ternary_gate(node.type, a_wire, b_wire, c_wire, circuit)
+            
             # Binary operation gates
             left_wire = self._process_node(node.left, circuit)
             if left_wire is None:
@@ -204,6 +215,65 @@ class CircuitGenerator:
         
         return output_wire
     
+    def _add_ternary_gate(self, op_type: TokenType, a_wire: str, b_wire: str, c_wire: str, 
+                        circuit: Circuit) -> str:
+        """Add a ternary operation gate to the circuit.
+        
+        Args:
+            op_type: Type of operation (AND, OR, XOR)
+            a_wire: Name of the first input wire
+            b_wire: Name of the second input wire
+            c_wire: Name of the third input wire
+            circuit: Circuit being built
+            
+        Returns:
+            Name of the output wire
+        """
+        output_wire = self._generate_wire_name()
+        
+        # Map operation types to MTNCL gates
+        gate_type_map = {
+            TokenType.AND: "TH33",  # 3-input threshold gate
+            TokenType.OR: "TH13",   # 3-input OR gate
+            TokenType.XOR: None     # No 3-input XOR gate
+        }
+        
+        gate_type = gate_type_map[op_type]
+        if gate_type is None or gate_type not in self.gates:
+            # Fall back to binary gates if 3-input gate not available
+            temp_wire = self._add_binary_gate(op_type, a_wire, b_wire, circuit)
+            if temp_wire is None:
+                return None
+            return self._add_binary_gate(op_type, temp_wire, c_wire, circuit)
+        
+        gate_name = self._generate_gate_name(gate_type.lower())
+        
+        # Create gate instance
+        inputs = {
+            "A": a_wire,
+            "B": b_wire,
+            "C": c_wire
+        }
+        
+        gate = GateInstance(
+            gate_type=gate_type,
+            instance_name=gate_name,
+            inputs=inputs,
+            outputs={"Z": output_wire}
+        )
+        
+        circuit.gates.append(gate)
+        circuit.wires[output_wire] = Wire(
+            name=output_wire,
+            source=gate_name,
+            destinations=set()
+        )
+        circuit.wires[a_wire].destinations.add(gate_name)
+        circuit.wires[b_wire].destinations.add(gate_name)
+        circuit.wires[c_wire].destinations.add(gate_name)
+        
+        return output_wire
+    
     def _generate_wire_name(self) -> str:
         """Generate a unique wire name."""
         wire_name = f"w{self.wire_counter}"
@@ -253,40 +323,58 @@ class CircuitGenerator:
             circuit: Circuit to validate
             
         Returns:
-            True if circuit is valid, False otherwise
+            True if the circuit is valid, False otherwise
         """
+        if circuit is None:
+            return False
+        
+        # Check gate fanout constraints
+        max_fanout = self.config['gate_constraints']['max_fanout']
+        
+        # Count fanout for each wire
+        fanout_count = {wire_name: 0 for wire_name in circuit.wires}
+        
+        # Count how many times each wire is used as an input to gates
+        for gate in circuit.gates:
+            for input_port, wire_name in gate.inputs.items():
+                fanout_count[wire_name] = fanout_count.get(wire_name, 0) + 1
+        
+        # Check if any wire exceeds the maximum fanout
+        for wire_name, count in fanout_count.items():
+            if count > max_fanout:
+                return False
+            
+        # Check circuit depth constraints
+        max_depth = self.config['gate_constraints']['max_depth']
+        if circuit.depth > max_depth:
+            return False
+        
         # Check gate count constraints
-        if (self.config.get('min_gates') and 
-            circuit.gate_count < self.config['min_gates']):
+        if self.config['min_gates'] is not None and len(circuit.gates) < self.config['min_gates']:
             return False
-        if (self.config.get('max_gates') and 
-            circuit.gate_count > self.config['max_gates']):
+        if self.config['max_gates'] is not None and len(circuit.gates) > self.config['max_gates']:
             return False
         
-        # Check for unconnected wires
-        for wire_name, wire in circuit.wires.items():
-            if wire_name not in circuit.inputs and not wire.source:
-                return False
-            if wire_name not in circuit.outputs and not wire.destinations:
-                return False
-        
-        # Check for cycles using networkx
-        graph = nx.DiGraph()
-        for gate in circuit.gates:
-            for _, input_wire in gate.inputs.items():
-                if input_wire not in circuit.inputs:
-                    driving_gate = circuit.wires[input_wire].source
-                    graph.add_edge(driving_gate, gate.instance_name)
-        
-        # Check that all gates are valid
-        for gate in circuit.gates:
-            if gate.gate_type not in self.gates:
-                return False
-        
-        # Check that the graph is acyclic
-        if len(circuit.gates) > 0:
-            return nx.is_directed_acyclic_graph(graph)
-        return True 
+        # Check gate type constraints
+        if 'gates' in self.config:
+            # Check if any avoided gates are used
+            avoid_gates = set(self.config['gates'].get('avoid', []))
+            for gate in circuit.gates:
+                if gate.gate_type in avoid_gates:
+                    return False
+                
+            # Check if preferred gates are used when possible
+            preferred_gates = set(self.config['gates'].get('preferred', []))
+            if preferred_gates:
+                has_preferred = False
+                for gate in circuit.gates:
+                    if gate.gate_type in preferred_gates:
+                        has_preferred = True
+                        break
+                if not has_preferred and any(g in self.gates for g in preferred_gates):
+                    return False
+                
+        return True
 
     def _are_circuits_equivalent(self, circuit1: Circuit, circuit2: Circuit) -> bool:
         """Check if two circuits are functionally equivalent.

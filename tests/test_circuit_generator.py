@@ -77,15 +77,24 @@ def basic_gates():
 
 @pytest.fixture
 def basic_config():
-    """Fixture providing basic configuration."""
+    """Basic configuration for circuit generation."""
     return {
-        'min_gates': 1,
-        'max_gates': None,
-        'optimization_target': 'area',
         'gate_constraints': {
-            'max_fanout': 4,
-            'max_depth': 10
-        }
+            'max_depth': 10,
+            'max_fanout': 4
+        },
+        'gates': {
+            'preferred': [],
+            'avoid': []
+        },
+        'optimization_target': 'area',
+        'optimization_weights': {
+            'area': 1.0,
+            'delay': 0.5,
+            'power': 0.5
+        },
+        'max_gates': None,
+        'min_gates': 1
     }
 
 def test_simple_or_circuit(basic_gates, basic_config):
@@ -221,3 +230,146 @@ def test_unsupported_not(basic_gates, basic_config):
     circuits = generator.generate_circuits(1)
     
     assert len(circuits) == 0  # Should not generate any circuits 
+
+def test_xor_circuit(basic_gates, basic_config):
+    """Test generation of XOR circuit."""
+    parser = BooleanParser("A ^ B")
+    ast = parser.parse()
+    
+    generator = CircuitGenerator(basic_gates, ast, basic_config)
+    circuits = generator.generate_circuits(1)
+    
+    assert len(circuits) == 1
+    circuit = circuits[0]
+    
+    # Check circuit structure
+    assert len(circuit.gates) == 1
+    assert circuit.gates[0].gate_type == "THXOR"
+
+def test_complex_expression(basic_gates, basic_config):
+    """Test generation of a complex boolean expression."""
+    parser = BooleanParser("(A + B) & (C ^ D)")
+    ast = parser.parse()
+    
+    generator = CircuitGenerator(basic_gates, ast, basic_config)
+    circuits = generator.generate_circuits(1)
+    
+    assert len(circuits) == 1
+    circuit = circuits[0]
+    
+    # Should have 3 gates: OR, XOR, and AND
+    assert len(circuit.gates) == 3
+    gate_types = {gate.gate_type for gate in circuit.gates}
+    assert "TH12" in gate_types  # OR gate
+    assert "THXOR" in gate_types  # XOR gate
+    assert "TH22" in gate_types  # AND gate
+
+def test_three_input_gates(basic_gates, basic_config):
+    """Test using 3-input gates where possible."""
+    parser = BooleanParser("(A + B + C) & (D + E + F)")
+    ast = parser.parse()
+    
+    generator = CircuitGenerator(basic_gates, ast, basic_config)
+    circuits = generator.generate_circuits(1)
+    
+    assert len(circuits) == 1
+    circuit = circuits[0]
+    
+    # Should use TH13 gates instead of cascaded TH12
+    gate_types = {gate.gate_type for gate in circuit.gates}
+    assert "TH13" in gate_types
+
+def test_gate_fanout(basic_gates, basic_config):
+    """Test handling of gate fanout constraints."""
+    # Set max fanout to 2
+    basic_config['gate_constraints']['max_fanout'] = 2
+    
+    parser = BooleanParser("(A + A) & (A + A) & (A + A)")  # Would require fanout > 2
+    ast = parser.parse()
+    
+    generator = CircuitGenerator(basic_gates, ast, basic_config)
+    circuits = generator.generate_circuits(1)
+    
+    assert len(circuits) == 0  # Should not generate circuits that violate fanout
+
+def test_circuit_depth_constraint(basic_gates, basic_config):
+    """Test handling of circuit depth constraints."""
+    # Set max depth to 2
+    basic_config['gate_constraints']['max_depth'] = 2
+    
+    parser = BooleanParser("((A + B) & (C + D)) & ((E + F) & (G + H))")  # Would require depth > 2
+    ast = parser.parse()
+    
+    generator = CircuitGenerator(basic_gates, ast, basic_config)
+    circuits = generator.generate_circuits(1)
+    
+    assert len(circuits) == 0  # Should not generate circuits that exceed max depth
+
+def test_preferred_gates(basic_gates, basic_config):
+    """Test using preferred gates when available."""
+    # Set TH13 as preferred for OR operations
+    basic_config['gates']['preferred'] = ['TH13']
+    
+    parser = BooleanParser("A + B + C")
+    ast = parser.parse()
+    
+    generator = CircuitGenerator(basic_gates, ast, basic_config)
+    circuits = generator.generate_circuits(1)
+    
+    assert len(circuits) == 1
+    circuit = circuits[0]
+    
+    # Should use TH13 instead of cascaded TH12
+    assert any(gate.gate_type == "TH13" for gate in circuit.gates)
+
+def test_avoid_gates(basic_gates, basic_config):
+    """Test avoiding specified gates."""
+    # Avoid using TH12
+    basic_config['gates']['avoid'] = ['TH12']
+    
+    parser = BooleanParser("A + B")
+    ast = parser.parse()
+    
+    generator = CircuitGenerator(basic_gates, ast, basic_config)
+    circuits = generator.generate_circuits(1)
+    
+    assert len(circuits) == 1
+    circuit = circuits[0]
+    
+    # Should not use TH12
+    assert all(gate.gate_type != "TH12" for gate in circuit.gates)
+
+def test_wire_naming(basic_gates, basic_config):
+    """Test proper wire naming in generated circuits."""
+    parser = BooleanParser("(A + B) & (C + D)")
+    ast = parser.parse()
+    
+    generator = CircuitGenerator(basic_gates, ast, basic_config)
+    circuits = generator.generate_circuits(1)
+    
+    assert len(circuits) == 1
+    circuit = circuits[0]
+    
+    # Check wire naming convention
+    internal_wires = {wire for wire in circuit.wires 
+                     if wire not in circuit.inputs and wire not in circuit.outputs}
+    assert all(wire.startswith('w') for wire in internal_wires)
+
+def test_optimization_target(basic_gates, basic_config):
+    """Test circuit generation with different optimization targets."""
+    # Set optimization target to minimize delay
+    basic_config['optimization_target'] = 'delay'
+    basic_config['optimization_weights']['delay'] = 1.0
+    basic_config['optimization_weights']['area'] = 0.1
+    
+    parser = BooleanParser("A + B + C + D")
+    ast = parser.parse()
+    
+    generator = CircuitGenerator(basic_gates, ast, basic_config)
+    circuits = generator.generate_circuits(1)
+    
+    assert len(circuits) == 1
+    circuit = circuits[0]
+    
+    # Should prefer balanced tree structure for minimum delay
+    assert circuit.depth <= 2  # log2(4) rounded up 

@@ -70,17 +70,33 @@ class VHDLParser:
             ValueError: If VHDL syntax is invalid
         """
         # Find all entity declarations and their architectures
+        # Standard entity pattern
         entity_pattern = r"entity\s+(\w+)\s+is\s+Port\s*\((.*?)\)\s*;\s*end\s+\1\s*;"
-        arch_pattern = r"architecture\s+\w+\s+of\s+(\w+)\s+is\s+begin(.*?)end\s+\w+\s*;"
+        # Alternative entity pattern for polymorphic gates
+        alt_entity_pattern = r"entity\s+(\w+)\s+is\s*port\s*\((.*?)\)\s*;\s*end\s+entity\s+\1\s*;"
         
+        arch_pattern = r"architecture\s+\w+\s+of\s+(\w+)\s+is\s+begin(.*?)end\s+\w+\s*;"
+        # Alternative architecture pattern for polymorphic gates
+        alt_arch_pattern = r"architecture\s+\w+\s+of\s+(\w+)\s+is\s+begin(.*?)end\s+architecture\s+\w+\s*;"
+        
+        # Try standard pattern first
         entity_matches = list(re.finditer(entity_pattern, content, re.DOTALL | re.IGNORECASE))
+        
+        # If no matches, try alternative pattern
+        if not entity_matches:
+            entity_matches = list(re.finditer(alt_entity_pattern, content, re.DOTALL | re.IGNORECASE))
+        
         if not entity_matches:
             raise ValueError("No valid entity declarations found")
         
-        arch_matches = re.finditer(arch_pattern, content, re.DOTALL | re.IGNORECASE)
+        # Try both architecture patterns
+        arch_matches = list(re.finditer(arch_pattern, content, re.DOTALL | re.IGNORECASE))
+        alt_arch_matches = list(re.finditer(alt_arch_pattern, content, re.DOTALL | re.IGNORECASE))
         
         # Create a map of architectures by entity name
         arch_map = {match.group(1): match.group(2) for match in arch_matches}
+        # Add alternative architecture matches
+        arch_map.update({match.group(1): match.group(2) for match in alt_arch_matches})
         
         for match in entity_matches:
             gate_name = match.group(1)
@@ -121,10 +137,18 @@ class VHDLParser:
             List of Port objects
         """
         ports = []
+        # Standard port pattern
         port_pattern = r"(\w+)\s*:\s*(in|out)\s+(\w+(?:_VECTOR)?(?:\s*\(\s*\d+\s+\w+\s+\d+\s*\))?)"
+        # Alternative port pattern for polymorphic gates
+        alt_port_pattern = r"(\w+)\s*:\s*(in|out)\s+(std_logic)"
         
         for line in ports_str.split(';'):
+            # Try standard pattern first
             match = re.search(port_pattern, line, re.IGNORECASE)
+            if not match:
+                # Try alternative pattern
+                match = re.search(alt_port_pattern, line, re.IGNORECASE)
+            
             if match:
                 port_type = match.group(3).strip().upper()
                 # Extract base type without range for vector types
@@ -149,22 +173,34 @@ class VHDLParser:
             List of Delay objects
         """
         delays = []
+        # Standard delay pattern
         delay_pattern = r"<=\s*'[01]'\s*after\s*(\d+)\s*ns"
+        # Alternative delay pattern for polymorphic gates (using ps)
+        alt_delay_pattern = r"<=\s*'[01]'\s*after\s*(\d+)\s*ps"
         condition_pattern = r"if\s+(.*?)\s+then"
         
         # Find all delay assignments
         for line in arch_str.split('\n'):
+            # Try standard pattern first
             delay_match = re.search(delay_pattern, line)
-            if delay_match:
+            if not delay_match:
+                # Try alternative pattern
+                delay_match = re.search(alt_delay_pattern, line)
+                if delay_match:
+                    # Convert ps to ns
+                    time = float(delay_match.group(1)) / 1000
+                else:
+                    continue
+            else:
                 time = float(delay_match.group(1))
-                
-                # Try to find associated condition
-                condition = "default"
-                cond_match = re.search(condition_pattern, line)
-                if cond_match:
-                    condition = cond_match.group(1).strip()
-                
-                delays.append(Delay(condition=condition, time=time))
+            
+            # Try to find associated condition
+            condition = "default"
+            cond_match = re.search(condition_pattern, line)
+            if cond_match:
+                condition = cond_match.group(1).strip()
+            
+            delays.append(Delay(condition=condition, time=time))
         
         return delays
 
@@ -177,4 +213,20 @@ class VHDLParser:
         Returns:
             GateInfo object if gate exists, None otherwise
         """
-        return self.gates.get(gate_name) 
+        return self.gates.get(gate_name)
+
+def parse_vhdl_gates(vhdl_file: str) -> Dict[str, GateInfo]:
+    """Parse VHDL file and extract gate information.
+    
+    Args:
+        vhdl_file: Path to VHDL file containing gate definitions
+        
+    Returns:
+        Dictionary mapping gate names to their GateInfo objects
+        
+    Raises:
+        FileNotFoundError: If VHDL file cannot be found
+        ValueError: If VHDL syntax is invalid
+    """
+    parser = VHDLParser([vhdl_file])
+    return parser.parse_gates() 

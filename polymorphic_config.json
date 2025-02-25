@@ -1,12 +1,16 @@
 {
     "input": {
-        "gates_dir": ["gates/basic_gates.vhdl"],
-        "equation": "(A + B) & (C + D)",
+        "gates_dir": [
+            "gates/basic_gates.vhdl",
+            "gates/MTNCL_Polymorphic_Gates_Basic.vhd"
+        ],
+        "hvdd_equation": "A + B",
+        "lvdd_equation": "A & B",
         "num_circuits": 2
     },
-    "mode": "regular",
+    "mode": "polymorphic",
     "output": {
-        "directory": "./output/regular",
+        "directory": "./output/polymorphic",
         "generate_testbench": true
     },
     "constraints": {
@@ -29,7 +33,13 @@
         "format": "markdown"
     },
     "gates": {
-        "preferred": [],
+        "preferred": ["TH12m_TH22m", "TH13m_TH33m"],
         "avoid": []
+    },
+    "polymorphic": {
+        "use_direct_mapping": true,
+        "use_alternative_mapping": true,
+        "required_gates": ["TH12m_TH22m"],
+        "alternative_gates": ["TH13m_TH33m"]
     }
 } 

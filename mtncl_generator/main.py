@@ -4,338 +4,335 @@ import argparse
 import json
 import logging
 import os
-import sys
-from typing import List, Dict, Any
+from typing import Dict, List, Optional
 
-from .parsers.vhdl_parser import VHDLParser
-from .parsers.boolean_parser import BooleanParser
-from .core.circuit_generator import CircuitGenerator, Circuit
-from .writers.verilog_writer import VerilogWriter
+from .parsers.vhdl_parser import parse_vhdl_gates
+from .parsers.boolean_parser import parse_boolean_equation
+from .core.circuit_generator import CircuitGenerator
+from .core.polymorphic_generator import PolymorphicCircuitGenerator
+from .writers.verilog_writer import write_verilog_netlist
 
-def setup_logging(log_level: str = "INFO") -> None:
-    """Set up logging configuration.
-    
-    Args:
-        log_level: Desired logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    """
+def load_config(config_path: str) -> Dict:
+    """Load configuration from JSON file."""
+    with open(config_path, 'r') as f:
+        return json.load(f)
+
+def setup_logging(level: str = 'INFO') -> None:
+    """Configure logging."""
     logging.basicConfig(
-        level=getattr(logging, log_level.upper()),
+        level=getattr(logging, level.upper()),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
 
-def load_config(config_file: str) -> Dict[str, Any]:
-    """Load configuration from JSON file.
-    
-    Args:
-        config_file: Path to configuration file
-        
-    Returns:
-        Dictionary containing configuration parameters
-        
-    Raises:
-        FileNotFoundError: If config file doesn't exist
-        json.JSONDecodeError: If config file is invalid JSON
-    """
-    try:
-        with open(config_file, 'r') as f:
-            config = json.load(f)
-    except FileNotFoundError:
-        logging.error(f"Configuration file not found: {config_file}")
-        raise
-    except json.JSONDecodeError as e:
-        logging.error(f"Invalid JSON in configuration file: {str(e)}")
-        raise
-    
-    return config
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description='Generate MTNCL circuits from boolean equations')
+    parser.add_argument('vhdl_files', nargs='*', help='VHDL files with gate definitions')
+    parser.add_argument('-e', '--equation', help='Boolean equation for regular MTNCL circuit')
+    parser.add_argument('--hvdd-equation', help='Boolean equation for HVDD operation')
+    parser.add_argument('--lvdd-equation', help='Boolean equation for LVDD operation')
+    parser.add_argument('-n', '--num-circuits', type=int, help='Number of circuits to generate')
+    parser.add_argument('-c', '--config', default='config.json', help='Configuration file')
+    parser.add_argument('-p', '--polymorphic-config', default='polymorphic_config.json', 
+                        help='Polymorphic configuration file')
+    parser.add_argument('-o', '--output-dir', help='Output directory')
+    parser.add_argument('-l', '--log-level', default='INFO', help='Logging level')
+    parser.add_argument('--polymorphic', action='store_true', help='Generate polymorphic circuits')
+    return parser.parse_args()
 
-def generate_documentation(circuits: List[Circuit], config: Dict[str, Any], output_dir: str) -> None:
-    """Generate documentation for the generated circuits.
-    
-    Args:
-        circuits: List of generated circuits
-        config: Configuration parameters
-        output_dir: Directory to save documentation
-    """
-    if not config.get('documentation', {}).get('include_metrics', True):
-        return
-        
-    doc_path = os.path.join(output_dir, "README.md")
-    
+def generate_regular_documentation(output_dir: str, circuits: List, config: Dict) -> None:
+    """Generate documentation for regular MTNCL circuit generation results."""
+    doc_path = os.path.join(output_dir, 'README.md')
     with open(doc_path, 'w') as f:
-        f.write("# MTNCL Circuit Generation Results\n\n")
-        
-        # Circuit summary
-        f.write("## Overview\n\n")
-        f.write(f"Generated {len(circuits)} circuit implementations for the boolean equation:\n")
-        f.write(f"```\n{config['input']['boolean_equation']}\n```\n\n")
-        
-        # Limitations and Supported Operations
-        f.write("## Limitations and Supported Operations\n\n")
-        f.write("### Supported Operations\n")
-        f.write("- AND operations using TH22/TH33 gates\n")
-        f.write("- OR operations using TH12/TH13 gates\n")
-        f.write("- XOR operations using THXOR gates\n")
-        f.write("- 2-of-3 threshold operations using TH23 gates\n\n")
-        
-        f.write("### Limitations\n")
-        f.write("- Negation (NOT) operations are not supported\n")
-        f.write("- All operations must be implemented using threshold gates\n")
-        f.write("- Maximum circuit depth is limited by configuration\n")
-        f.write("- Maximum fanout is limited by configuration\n\n")
+        f.write('# MTNCL Circuit Generation Results\n\n')
         
         # Configuration summary
-        f.write("## Configuration\n\n")
-        f.write("```json\n")
-        f.write(json.dumps(config, indent=4))
-        f.write("\n```\n\n")
+        f.write('## Configuration\n\n')
+        f.write(f"Boolean Equation: {config['input']['equation']}\n\n")
         
-        # Circuit metrics
-        f.write("## Generated Circuits\n\n")
+        # Circuit implementations
+        f.write('## Generated Circuits\n\n')
         for i, circuit in enumerate(circuits):
-            f.write(f"### Circuit {i}\n\n")
-            f.write(f"- Gate count: {circuit.gate_count}\n")
-            f.write(f"- Circuit depth: {circuit.depth}\n")
-            f.write(f"- Input ports: {', '.join(sorted(circuit.inputs))}\n")
-            f.write(f"- Output ports: {', '.join(sorted(circuit.outputs))}\n")
-            f.write(f"- Internal wires: {len(circuit.wires) - len(circuit.inputs) - len(circuit.outputs)}\n")
-            
-            # Gate breakdown
+            f.write(f'### Circuit {i}\n\n')
+            f.write(f"Gate Count: {circuit.gate_count}\n")
+            f.write(f"Circuit Depth: {circuit.depth}\n")
+            f.write('\nGates Used:\n')
             gate_types = {}
             for gate in circuit.gates:
-                gate_types[gate.gate_type] = gate_types.get(gate.gate_type, 0) + 1
-            f.write("\nGate breakdown:\n")
-            for gate_type, count in sorted(gate_types.items()):
-                f.write(f"- {gate_type}: {count}\n")
-            f.write("\n")
+                gate_type = gate.gate_type
+                gate_types[gate_type] = gate_types.get(gate_type, 0) + 1
             
-        # File listing
-        f.write("## Generated Files\n\n")
-        f.write("```\n")
-        f.write("output/\n")
-        for i in range(len(circuits)):
-            f.write(f"├── circuit_{i}.v          # Circuit implementation {i}\n")
-            if config.get('output', {}).get('generate_testbench', False):
-                f.write(f"├── circuit_{i}_tb.v       # Testbench for circuit {i}\n")
-        f.write("└── README.md            # This documentation\n")
-        f.write("```\n")
+            for gate_type, count in gate_types.items():
+                f.write(f"- {gate_type}: {count}\n")
+            f.write('\n')
+
+def generate_polymorphic_documentation(output_dir: str, circuits: List, config: Dict) -> None:
+    """Generate documentation for polymorphic circuit generation results."""
+    doc_path = os.path.join(output_dir, 'README.md')
+    with open(doc_path, 'w') as f:
+        f.write('# Polymorphic MTNCL Circuit Generation Results\n\n')
+        
+        # Configuration summary
+        f.write('## Configuration\n\n')
+        f.write(f"HVDD Function: {config['input']['hvdd_equation']}\n")
+        f.write(f"LVDD Function: {config['input']['lvdd_equation']}\n\n")
+        
+        # Circuit implementations
+        f.write('## Generated Circuits\n\n')
+        for i, circuit in enumerate(circuits):
+            f.write(f'### Circuit {i}\n\n')
+            
+            # Handle both object and dictionary formats
+            if isinstance(circuit, dict):
+                # Dictionary format
+                f.write(f"Gate Count: {len(circuit['gates'])}\n")
+                f.write(f"Inputs: {', '.join(circuit['inputs'])}\n")
+                f.write(f"Outputs: {', '.join(circuit['outputs'])}\n")
+                f.write(f"HVDD Function: {circuit.get('hvdd_function', '')}\n")
+                f.write(f"LVDD Function: {circuit.get('lvdd_function', '')}\n")
+                
+                f.write('\nPolymorphic Gates Used:\n')
+                gate_types = {}
+                for gate in circuit['gates']:
+                    gate_type = gate['type']
+                    gate_types[gate_type] = gate_types.get(gate_type, 0) + 1
+                
+                for gate_type, count in gate_types.items():
+                    f.write(f"- {gate_type}: {count}\n")
+            else:
+                # Object format
+                if hasattr(circuit, 'hvdd_circuit') and hasattr(circuit, 'lvdd_circuit'):
+                    f.write(f"HVDD Gate Count: {circuit.hvdd_circuit.gate_count}\n")
+                    f.write(f"LVDD Gate Count: {circuit.lvdd_circuit.gate_count}\n")
+                    f.write(f"HVDD Circuit Depth: {circuit.hvdd_circuit.depth}\n")
+                    f.write(f"LVDD Circuit Depth: {circuit.lvdd_circuit.depth}\n")
+                else:
+                    f.write(f"Gate Count: {circuit.gate_count}\n")
+                    f.write(f"Circuit Depth: {circuit.depth}\n")
+                
+                f.write('\nPolymorphic Gates Used:\n')
+                gate_types = {}
+                for gate in circuit.gates:
+                    gate_type = gate.gate_type
+                    gate_types[gate_type] = gate_types.get(gate_type, 0) + 1
+                
+                for gate_type, count in gate_types.items():
+                    f.write(f"- {gate_type}: {count}\n")
+            
+            f.write('\n')
 
 def generate_mtncl_circuits(
-    vhdl_files: List[str],
-    boolean_equation: str,
-    num_circuits: int,
-    config: Dict[str, Any]
-) -> List[str]:
-    """Generate MTNCL circuit implementations from a boolean equation.
+    equation: Optional[str] = None,
+    hvdd_equation: Optional[str] = None,
+    lvdd_equation: Optional[str] = None,
+    gate_files: Optional[List[str]] = None,
+    output_dir: str = 'output',
+    num_circuits: int = 1,
+    is_polymorphic: bool = False,
+    generate_docs: bool = True,
+    generate_testbench: bool = False
+) -> List[Dict]:
+    """Generate MTNCL circuits from boolean equations.
     
     Args:
-        vhdl_files: List of VHDL files containing gate definitions
-        boolean_equation: Boolean equation to implement
-        num_circuits: Number of different implementations to generate
-        config: Configuration parameters
+        equation: Boolean equation for regular MTNCL circuit
+        hvdd_equation: Boolean equation for HVDD operation
+        lvdd_equation: Boolean equation for LVDD operation
+        gate_files: List of VHDL files with gate definitions
+        output_dir: Directory to store generated files
+        num_circuits: Number of circuits to generate
+        is_polymorphic: Whether to generate polymorphic circuits
+        generate_docs: Whether to generate documentation
+        generate_testbench: Whether to generate testbenches
         
     Returns:
-        List of Verilog netlist strings
+        List of generated circuit dictionaries
         
     Raises:
-        ValueError: If inputs are invalid
+        ValueError: If required parameters are missing or invalid
     """
-    logger = logging.getLogger(__name__)
-    
-    # Parse VHDL files
-    logger.info("Parsing VHDL files...")
-    vhdl_parser = VHDLParser(vhdl_files)
-    available_gates = vhdl_parser.parse_gates()
-    
-    # Parse boolean equation
-    logger.info("Parsing boolean equation...")
-    boolean_parser = BooleanParser(boolean_equation)
-    ast = boolean_parser.parse()
-    
-    # Generate circuits
-    logger.info("Generating circuits...")
-    circuit_generator = CircuitGenerator(available_gates, ast, config)
-    circuits = circuit_generator.generate_circuits(num_circuits)
-    
-    if not circuits:
-        logger.warning("No valid circuits generated!")
-        return []
-    
-    # Create output directory
-    output_dir = config.get('output_dir', './output')
+    # Ensure output directory exists
     os.makedirs(output_dir, exist_ok=True)
     
-    # Generate documentation
-    logger.info("Generating documentation...")
-    generate_documentation(circuits, config, output_dir)
+    # Parse gate definitions
+    gates_dict = {}
+    if gate_files:
+        for gate_file in gate_files:
+            gates_dict.update(parse_vhdl_gates(gate_file))
     
-    # Generate Verilog netlists
-    logger.info("Generating Verilog netlists...")
-    netlists = []
+    # Generate circuits based on mode
+    is_polymorphic = is_polymorphic or (hvdd_equation and lvdd_equation)
+    
+    if is_polymorphic:
+        # Validate required equations
+        if not hvdd_equation or not lvdd_equation:
+            raise ValueError("Both HVDD and LVDD equations are required for polymorphic generation")
+            
+        # Generate polymorphic circuits
+        generator = PolymorphicCircuitGenerator(
+            gates_dict,
+            hvdd_equation,
+            lvdd_equation
+        )
+        circuits = generator.generate_circuits()
+        
+        if not circuits:
+            raise ValueError("No valid polymorphic implementations found")
+            
+        # Generate documentation
+        if generate_docs:
+            config = {
+                'input': {
+                    'hvdd_equation': hvdd_equation,
+                    'lvdd_equation': lvdd_equation
+                }
+            }
+            generate_polymorphic_documentation(output_dir, circuits, config)
+    else:
+        # Validate required equation
+        if not equation:
+            raise ValueError("Boolean equation is required for regular circuit generation")
+            
+        # Generate regular MTNCL circuits
+        generator = CircuitGenerator(
+            gates_dict,
+            equation
+        )
+        circuits = generator.generate_circuits()
+        
+        if not circuits:
+            raise ValueError("No valid circuits generated")
+            
+        # Generate documentation
+        if generate_docs:
+            config = {
+                'input': {
+                    'equation': equation
+                }
+            }
+            generate_regular_documentation(output_dir, circuits, config)
+    
+    # Generate output files
     for i, circuit in enumerate(circuits):
-        writer = VerilogWriter(circuit, f"mtncl_circuit_{i}")
-        netlist = writer.generate_netlist()
-        netlists.append(netlist)
+        output_file = os.path.join(output_dir, f'circuit_{i}.v')
+        write_verilog_netlist(circuit, output_file)
         
-        # Save netlist
-        netlist_path = os.path.join(output_dir, f"circuit_{i}.v")
-        with open(netlist_path, 'w') as f:
-            f.write(netlist)
-        logger.info(f"Saved netlist to {netlist_path}")
-        
-        # Generate testbench if requested
-        if config.get('generate_testbench', False):
-            testbench = writer.generate_testbench()
-            testbench_path = os.path.join(output_dir, f"circuit_{i}_tb.v")
-            with open(testbench_path, 'w') as f:
-                f.write(testbench)
-            logger.info(f"Saved testbench to {testbench_path}")
+        if generate_testbench:
+            tb_file = os.path.join(output_dir, f'circuit_{i}_tb.v')
+            write_verilog_netlist(circuit, tb_file, is_testbench=True)
     
-    return netlists
+    return circuits
 
-def save_netlists(netlists: List[str], output_dir: str) -> None:
-    """Save Verilog netlists to files.
+def main() -> None:
+    """Main entry point."""
+    args = parse_args()
     
-    Args:
-        netlists: List of Verilog netlist strings
-        output_dir: Directory to save files in
-    """
-    logger = logging.getLogger(__name__)
-    
-    # Create output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Save each netlist
-    for i, netlist in enumerate(netlists):
-        filename = os.path.join(output_dir, f"circuit_{i}.v")
-        try:
-            with open(filename, 'w') as f:
-                f.write(netlist)
-            logger.info(f"Saved netlist to {filename}")
-        except IOError as e:
-            logger.error(f"Failed to save netlist to {filename}: {str(e)}")
-            raise
-
-def main():
-    """Main entry point for the MTNCL circuit generator."""
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(
-        description="Generate MTNCL circuits from boolean equations"
-    )
-    parser.add_argument(
-        'vhdl_files',
-        nargs='*',
-        help="VHDL files containing gate definitions (optional if specified in config)"
-    )
-    parser.add_argument(
-        'equation',
-        nargs='?',
-        help="Boolean equation to implement (optional if specified in config)"
-    )
-    parser.add_argument(
-        '-n', '--num-circuits',
-        type=int,
-        help="Number of different implementations to generate (optional if specified in config)"
-    )
-    parser.add_argument(
-        '-c', '--config',
-        default='config.json',
-        help="Configuration file path"
-    )
-    parser.add_argument(
-        '-o', '--output-dir',
-        help="Output directory for generated files (optional if specified in config)"
-    )
-    parser.add_argument(
-        '-l', '--log-level',
-        default='INFO',
-        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-        help="Set logging level"
-    )
-    
-    args = parser.parse_args()
-    
-    # Setup logging
+    # Determine which config file to use based on mode
+    config_file = args.polymorphic_config if args.polymorphic else args.config
+    config = load_config(config_file)
     setup_logging(args.log_level)
-    logger = logging.getLogger(__name__)
     
-    try:
-        # Load configuration
-        config = load_config(args.config)
+    # Override config with command line arguments
+    if args.vhdl_files:
+        config['input']['gates_dir'] = args.vhdl_files
+    if args.equation and not args.polymorphic:
+        config['input']['equation'] = args.equation
+    if args.hvdd_equation:
+        config['input']['hvdd_equation'] = args.hvdd_equation
+    if args.lvdd_equation:
+        config['input']['lvdd_equation'] = args.lvdd_equation
+    if args.num_circuits:
+        config['input']['num_circuits'] = args.num_circuits
+    if args.output_dir:
+        config['output']['directory'] = args.output_dir
+    if args.polymorphic:
+        config['mode'] = 'polymorphic'
         
-        # Ensure required sections exist
-        if 'input' not in config:
-            config['input'] = {}
-        if 'output' not in config:
-            config['output'] = {}
-        if 'constraints' not in config:
-            config['constraints'] = {}
-        if 'optimization' not in config:
-            config['optimization'] = {}
-        if 'gates' not in config:
-            config['gates'] = {}
-        
-        # Override config with command line arguments if provided
-        if args.vhdl_files:
-            config['input']['gates_dir'] = args.vhdl_files[0]
-        if args.equation:
-            config['input']['boolean_equation'] = args.equation
-        if args.num_circuits:
-            config['input']['num_circuits'] = args.num_circuits
-        if args.output_dir:
-            config['output']['directory'] = args.output_dir
+    # Ensure output directory exists
+    os.makedirs(config['output']['directory'], exist_ok=True)
+    
+    # Parse gate definitions
+    gates_dict = {}
+    gate_files = config['input']['gates_dir']
+    if isinstance(gate_files, str):
+        gate_files = [gate_files]
+    for gate_file in gate_files:
+        gates_dict.update(parse_vhdl_gates(gate_file))
+    
+    # Generate circuits based on mode
+    is_polymorphic = config.get('mode') == 'polymorphic' or (args.hvdd_equation and args.lvdd_equation)
+    
+    if is_polymorphic:
+        # Validate required equations
+        if not config['input'].get('hvdd_equation') or not config['input'].get('lvdd_equation'):
+            logging.error("Both HVDD and LVDD equations are required for polymorphic generation")
+            return
             
-        # Validate required parameters
-        if 'gates_dir' not in config['input']:
-            raise ValueError("No VHDL files specified in config or command line")
-        if 'boolean_equation' not in config['input']:
-            raise ValueError("No boolean equation specified in config or command line")
-            
-        # Convert config structure to old format for backward compatibility
-        compat_config = {
-            'min_gates': config['constraints'].get('min_gates', 1),
-            'max_gates': config['constraints'].get('max_gates', None),
-            'optimization_target': config['optimization'].get('target', 'area'),
-            'output_dir': config['output'].get('directory', './output'),
-            'generate_testbench': config['output'].get('generate_testbench', True),
-            'gate_constraints': {
-                'max_fanout': config['constraints'].get('max_fanout', 4),
-                'max_depth': config['constraints'].get('max_depth', 10),
-                'preferred_gates': config['gates'].get('preferred', []),
-                'avoid_gates': config['gates'].get('avoid', [])
-            },
-            'optimization_weights': config['optimization'].get('weights', {
-                'area': 1.0,
-                'delay': 0.5,
-                'power': 0.3
-            }),
-            'documentation': config.get('documentation', {
-                'include_metrics': True,
-                'include_diagrams': False,
-                'format': 'markdown'
-            })
+        # Generate polymorphic circuits
+        polymorphic_config = {
+            'use_direct_mapping': config.get('polymorphic', {}).get('use_direct_mapping', True),
+            'use_alternative_mapping': config.get('polymorphic', {}).get('use_alternative_mapping', True),
+            'gate_constraints': config.get('constraints', {}),
+            'min_gates': config.get('constraints', {}).get('min_gates'),
+            'max_gates': config.get('constraints', {}).get('max_gates'),
+            'gates': config.get('gates', {})
         }
         
-        # Generate circuits
-        netlists = generate_mtncl_circuits(
-            [config['input']['gates_dir']],
-            config['input']['boolean_equation'],
-            config['input'].get('num_circuits', 1),
-            compat_config
+        generator = PolymorphicCircuitGenerator(
+            gates_dict,
+            config['input']['hvdd_equation'],
+            config['input']['lvdd_equation'],
+            polymorphic_config
         )
+        circuits = generator.generate_circuits(config['input'].get('num_circuits', 1))
         
-        # Save netlists
-        if netlists:
-            save_netlists(netlists, config['output']['directory'])
-            logger.info("Circuit generation completed successfully")
-        else:
-            logger.error("No circuits were generated")
-            sys.exit(1)
+        if not circuits:
+            logging.error("No valid polymorphic implementations found")
+            return
             
-    except Exception as e:
-        logger.error(f"Circuit generation failed: {str(e)}")
-        if logger.getEffectiveLevel() <= logging.DEBUG:
-            logger.exception("Detailed error information:")
-        sys.exit(1)
+        # Generate documentation
+        if config.get('documentation', {}).get('format') == 'markdown':
+            generate_polymorphic_documentation(config['output']['directory'], circuits, config)
+    else:
+        # Validate required equation
+        if not config['input'].get('equation'):
+            logging.error("Boolean equation is required for regular circuit generation")
+            return
+            
+        # Generate regular MTNCL circuits
+        circuit_config = {
+            'gate_constraints': config.get('constraints', {}),
+            'min_gates': config.get('constraints', {}).get('min_gates'),
+            'max_gates': config.get('constraints', {}).get('max_gates'),
+            'gates': config.get('gates', {})
+        }
+        
+        ast = parse_boolean_equation(config['input']['equation'])
+        generator = CircuitGenerator(
+            gates_dict,
+            ast,
+            circuit_config
+        )
+        circuits = generator.generate_circuits(config['input'].get('num_circuits', 1))
+        
+        if not circuits:
+            logging.error("No valid circuits generated")
+            return
+            
+        # Generate documentation
+        if config.get('documentation', {}).get('format') == 'markdown':
+            generate_regular_documentation(config['output']['directory'], circuits, config)
+    
+    # Generate output files
+    for i, circuit in enumerate(circuits):
+        output_file = os.path.join(config['output']['directory'], f'circuit_{i}.v')
+        write_verilog_netlist(circuit, output_file)
+        
+        if config['output'].get('generate_testbench', False):
+            tb_file = os.path.join(config['output']['directory'], f'circuit_{i}_tb.v')
+            write_verilog_netlist(circuit, tb_file, is_testbench=True)
+    
+    logging.info(f"Generated {len(circuits)} circuits in {config['output']['directory']}")
 
 if __name__ == "__main__":
     main() 

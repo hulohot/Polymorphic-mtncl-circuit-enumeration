@@ -1,19 +1,38 @@
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Union, Any
 from ..core.circuit_generator import Circuit, GateInstance, Wire
 
 class VerilogWriter:
     """Writer for generating Verilog netlists from circuit descriptions."""
     
-    def __init__(self, circuit: Circuit, module_name: str = "mtncl_circuit"):
+    def __init__(self, circuit: Union[Circuit, Dict[str, Any]], module_name: str = "mtncl_circuit"):
         """Initialize the Verilog writer.
         
         Args:
-            circuit: Circuit object to convert to Verilog
+            circuit: Circuit object or dictionary to convert to Verilog
             module_name: Name of the Verilog module to generate
         """
         self.circuit = circuit
         self.module_name = module_name
         self.testbench_name = f"{module_name}_tb"
+        self._is_dict = isinstance(circuit, dict)
+        
+        # Extract circuit properties based on type
+        if self._is_dict:
+            self.inputs = set(circuit.get('inputs', []))
+            self.outputs = set(circuit.get('outputs', []))
+            self.gates = circuit.get('gates', [])
+            # Collect all wires from gate connections
+            self.wires = set()
+            for gate in self.gates:
+                for wire in gate.get('inputs', {}).values():
+                    self.wires.add(wire)
+                for wire in gate.get('outputs', {}).values():
+                    self.wires.add(wire)
+        else:
+            self.inputs = circuit.inputs
+            self.outputs = circuit.outputs
+            self.gates = circuit.gates
+            self.wires = circuit.wires
     
     def generate_netlist(self) -> str:
         """Generate a complete Verilog netlist for the circuit.
@@ -59,7 +78,7 @@ class VerilogWriter:
         lines.append("")
         
         # Input ports
-        input_ports = sorted(p for p in self.circuit.inputs if p not in {"sleep", "rst"})
+        input_ports = sorted(p for p in self.inputs if p not in {"sleep", "rst"})
         if input_ports:
             lines.append("    // Input ports")
             for port in input_ports:
@@ -67,7 +86,7 @@ class VerilogWriter:
             lines.append("")
         
         # Output ports
-        output_ports = sorted(self.circuit.outputs)
+        output_ports = sorted(self.outputs)
         lines.append("    // Output ports")
         for port in output_ports[:-1]:
             lines.append(f"    output wire {port},")
@@ -88,9 +107,9 @@ class VerilogWriter:
         internal_wires = set()
         
         # Find all internal wires (not inputs or outputs)
-        for wire_name in self.circuit.wires:
-            if (wire_name not in self.circuit.inputs and 
-                wire_name not in self.circuit.outputs):
+        for wire_name in self.wires:
+            if (wire_name not in self.inputs and 
+                wire_name not in self.outputs):
                 internal_wires.add(wire_name)
         
         if internal_wires:
@@ -110,8 +129,41 @@ class VerilogWriter:
         lines = []
         lines.append("    // Gate instantiations")
         
-        for gate in self.circuit.gates:
-            lines.extend(self._generate_single_gate(gate))
+        for i, gate in enumerate(self.gates):
+            if self._is_dict:
+                # Dictionary format
+                gate_type = gate.get('type', '').upper()
+                instance_name = f"{gate_type.lower()}_inst_{i}"
+                inputs = gate.get('inputs', {})
+                outputs = gate.get('outputs', {})
+                
+                lines.append(f"    {gate_type} {instance_name} (")
+                
+                # Connect inputs
+                input_connections = []
+                for port_name, wire_name in sorted(inputs.items()):
+                    input_connections.append(f".{port_name}({wire_name})")
+                
+                # Connect outputs
+                output_connections = []
+                for port_name, wire_name in sorted(outputs.items()):
+                    output_connections.append(f".{port_name}({wire_name})")
+                
+                # Add sleep and reset connections
+                input_connections.append(".S(sleep)")
+                input_connections.append(".vdd_sel(1'b1)")  # Default to high voltage mode
+                
+                # Combine all connections
+                all_connections = input_connections + output_connections
+                for conn in all_connections[:-1]:
+                    lines.append(f"        {conn},")
+                lines.append(f"        {all_connections[-1]}")
+                
+                lines.append("    );")
+                lines.append("")
+            else:
+                # Circuit object format
+                lines.extend(self._generate_single_gate(gate))
         
         return lines
     
@@ -168,7 +220,7 @@ class VerilogWriter:
         lines.append("    reg rst;")
         lines.append("")
         
-        input_ports = sorted(p for p in self.circuit.inputs if p not in {"sleep", "rst"})
+        input_ports = sorted(p for p in self.inputs if p not in {"sleep", "rst"})
         if input_ports:
             lines.append("    // Input signals")
             for input_port in input_ports:
@@ -176,7 +228,7 @@ class VerilogWriter:
             lines.append("")
         
         lines.append("    // Output signals")
-        for output_port in sorted(self.circuit.outputs):
+        for output_port in sorted(self.outputs):
             lines.append(f"    wire {output_port};")
         lines.append("")
         
@@ -190,7 +242,7 @@ class VerilogWriter:
         connections.append("        .rst(rst)")
         for port in input_ports:
             connections.append(f"        .{port}({port})")
-        for port in sorted(self.circuit.outputs):
+        for port in sorted(self.outputs):
             connections.append(f"        .{port}({port})")
         
         lines.append(",\n".join(connections))
@@ -247,7 +299,7 @@ class VerilogWriter:
         monitor_ports = []
         for port in input_ports:
             monitor_ports.append(f"{port}=%b")
-        for port in sorted(self.circuit.outputs):
+        for port in sorted(self.outputs):
             monitor_ports.append(f"{port}=%b")
         
         lines.append(" ".join(monitor_ports) + "\",")
@@ -255,7 +307,7 @@ class VerilogWriter:
         # Add monitored signals
         monitor_signals = ["sleep", "rst"]
         monitor_signals.extend(input_ports)
-        monitor_signals.extend(sorted(self.circuit.outputs))
+        monitor_signals.extend(sorted(self.outputs))
         
         lines.append("            " + ", ".join(monitor_signals))
         lines.append("        );")
@@ -264,4 +316,23 @@ class VerilogWriter:
         
         lines.append("endmodule")
         
-        return "\n".join(lines) 
+        return "\n".join(lines)
+
+def write_verilog_netlist(circuit: Dict, output_file: str, is_testbench: bool = False) -> None:
+    """Write a Verilog netlist to a file.
+    
+    Args:
+        circuit: Circuit dictionary containing the netlist information
+        output_file: Path to the output file
+        is_testbench: Whether to generate a testbench instead of a netlist
+        
+    Raises:
+        ValueError: If the circuit dictionary is invalid
+    """
+    writer = VerilogWriter(circuit)
+    
+    with open(output_file, 'w') as f:
+        if is_testbench:
+            f.write(writer.generate_testbench())
+        else:
+            f.write(writer.generate_netlist()) 

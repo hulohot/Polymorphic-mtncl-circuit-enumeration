@@ -193,4 +193,19 @@ class BooleanParser:
                 raise ValueError("Unexpected tokens at end of expression")
             return True
         except Exception as e:
-            raise ValueError(f"Invalid boolean equation: {str(e)}") 
+            raise ValueError(f"Invalid boolean equation: {str(e)}")
+
+def parse_boolean_equation(equation: str) -> ASTNode:
+    """Parse a boolean equation and return its AST representation.
+    
+    Args:
+        equation: String containing the boolean equation
+        
+    Returns:
+        Root node of the Abstract Syntax Tree
+        
+    Raises:
+        ValueError: If the equation syntax is invalid
+    """
+    parser = BooleanParser(equation)
+    return parser.parse() 
